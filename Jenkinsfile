@@ -14,6 +14,16 @@ pipeline {
             }
         }
 
+        stage('Check Environment') {
+            steps {
+                sh 'echo JAVA_HOME=$JAVA_HOME'
+                sh 'which java || true'
+                sh 'java -version || true'
+                sh 'which mvn || true'
+                sh 'mvn -version || true'
+            }
+        }
+
         stage('Clean') {
             steps {
                 echo 'Cleaning old build files...'

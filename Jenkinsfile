@@ -3,72 +3,59 @@ pipeline {
 
     tools {
         maven 'Maven3'
-        jdk 'JDK17'
+        jdk 'JDK21'
     }
 
     stages {
+
         stage('Checkout') {
             steps {
-                echo 'Getting source code from GitHub...'
+                echo 'Cloning GitHub repo...'
                 checkout scm
             }
         }
 
-        stage('Check Environment') {
+        stage('Build') {
             steps {
-                sh 'echo JAVA_HOME=$JAVA_HOME'
-                sh 'which java'
-                sh 'java -version'
-                sh 'which mvn'
-                sh 'mvn -version'
-            }
-        }
-
-        stage('Clean') {
-            steps {
-                echo 'Cleaning old build files...'
-                sh 'mvn clean'
-            }
-        }
-
-        stage('Compile') {
-            steps {
-                echo 'Compiling source code...'
-                sh 'mvn compile'
+                echo 'Running Maven build...'
+                bat 'mvn clean compile'
             }
         }
 
         stage('Test') {
             steps {
-                echo 'Running unit tests...'
-                sh 'mvn test'
+                echo 'Running tests...'
+                bat 'mvn test'
             }
         }
 
         stage('Package') {
             steps {
-                echo 'Creating jar file...'
-                sh 'mvn package'
+                echo 'Creating JAR...'
+                bat 'mvn package'
             }
         }
 
         stage('Archive') {
             steps {
-                echo 'Archiving jar...'
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            }
+        }
+
+        stage('Run App (Optional)') {
+            steps {
+                echo 'Starting Spring Boot app...'
+                bat 'start /b java -jar target\\*.jar'
             }
         }
     }
 
     post {
         success {
-            echo 'Pipeline completed successfully'
+            echo 'Build SUCCESS'
         }
         failure {
-            echo 'Pipeline failed'
-        }
-        always {
-            echo 'Pipeline execution finished'
+            echo 'Build FAILED'
         }
     }
 }
